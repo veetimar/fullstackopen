@@ -1,0 +1,13 @@
+sequenceDiagram
+    participant browser
+    participant server
+
+    Note right of browser: The browser displays a new note on the list
+
+    browser->>server: POST exampleapp/new_note_spa
+    activate server
+
+    Note left of server: The server saves the new note
+
+    server-->>browser: Confirmation
+    deactivate server
