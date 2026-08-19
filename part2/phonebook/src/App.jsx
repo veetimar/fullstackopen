@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import axios from 'axios'
+import personService from './services/persons'
 
 const Filter = (props) => {
   return (
@@ -41,11 +41,9 @@ const App = () => {
   const [newFilter, setNewFilter] = useState('')
 
   useEffect(() => {
-    axios
-      .get('http://localhost:3001/persons')
-      .then((response) => {
-        setPersons(response.data)
-        setPersonsToShow(response.data)
+    personService.getAll().then((initialPersons) => {
+        setPersons(initialPersons)
+        setPersonsToShow(initialPersons)
       })
   }, [])
 
@@ -69,10 +67,7 @@ const App = () => {
     event.preventDefault()
     if (!persons.find((person) => person.name === newName)) {
       const newPerson = { name: newName, number: newNumber }
-      axios
-        .post('http://localhost:3001/persons', newPerson)
-        .then((response) => {
-          const returnedPerson = response.data
+      personService.create(newPerson).then((returnedPerson) => {
           setPersons(persons.concat(returnedPerson))
           if (contains(newName, newFilter)) {
             setPersonsToShow(personsToShow.concat(returnedPerson))
