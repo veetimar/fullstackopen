@@ -29,8 +29,12 @@ const PersonForm = (props) => {
   )
 }
 
-const Persons = ({ persons }) => {
-  return (persons.map((person) => <div key={person.id}>{person.name} {person.number} <br /></div>))
+const Persons = ({ persons, deletePerson }) => {
+  return (persons.map((person) => (
+    <div key={person.id}>
+      {person.name} {person.number} <button onClick={() => deletePerson(person.id)}>delete</button> <br />
+    </div>))
+  )
 }
 
 const App = () => {
@@ -42,24 +46,25 @@ const App = () => {
 
   useEffect(() => {
     personService.getAll().then((initialPersons) => {
-        setPersons(initialPersons)
-        setPersonsToShow(initialPersons)
-      })
+      console.log("Got initial persons from server")
+      setPersons(initialPersons)
+      setPersonsToShow(initialPersons)
+    })
   }, [])
 
   const contains = (string, substring) => string.toLocaleLowerCase().includes(substring.toLocaleLowerCase())
 
-  const handleFilter = (event) => {
+  const handleFilterChange = (event) => {
     const filter = event.target.value
     setPersonsToShow(persons.filter((person) => contains(person.name, filter)))
     setNewFilter(filter)
   }
 
-  const handleName = (event) => {
+  const handleNameChange = (event) => {
     setNewName(event.target.value)
   }
 
-  const handleNumber = (event) => {
+  const handleNumberChange = (event) => {
     setNewNumber(event.target.value)
   }
 
@@ -67,12 +72,13 @@ const App = () => {
     event.preventDefault()
     if (!persons.find((person) => person.name === newName)) {
       const newPerson = { name: newName, number: newNumber }
-      personService.create(newPerson).then((returnedPerson) => {
-          setPersons(persons.concat(returnedPerson))
-          if (contains(newName, newFilter)) {
-            setPersonsToShow(personsToShow.concat(returnedPerson))
-          }
-        })
+      personService.createPerson(newPerson).then((returnedPerson) => {
+        console.log(`Created ${newPerson.name}`)
+        setPersons(persons.concat(returnedPerson))
+        if (contains(newName, newFilter)) {
+          setPersonsToShow(personsToShow.concat(returnedPerson))
+        }
+      })
       setNewName('')
       setNewNumber('')
     } else {
@@ -80,14 +86,24 @@ const App = () => {
     }
   }
 
+  const handlePersonDeletion = (id) => {
+    if (confirm(`Delete ${persons.find((person) => person.id == id).name}?`)) {
+      personService.deletePerson(id).then((deletedPerson) => {
+        console.log(`Deleted ${deletedPerson.name}`)
+        setPersons(persons.filter((person) => person.id !== id))
+        setPersonsToShow(personsToShow.filter((person) => person.id !== id))
+      })
+    }
+  }
+
   return (
     <div>
       <h2>Phonebook</h2>
-      <Filter newFilter={newFilter} handleFilter={handleFilter} />
+      <Filter newFilter={newFilter} handleFilter={handleFilterChange} />
       <h2>add a new</h2>
-      <PersonForm handleSubmit={handleSubmit} newName={newName} handleName={handleName} newNumber={newNumber} handleNumber={handleNumber} />
+      <PersonForm handleSubmit={handleSubmit} newName={newName} handleName={handleNameChange} newNumber={newNumber} handleNumber={handleNumberChange} />
       <h2>Numbers</h2>
-      <Persons persons={personsToShow} />
+      <Persons persons={personsToShow} deletePerson={handlePersonDeletion}/>
     </div>
   )
 }
