@@ -68,11 +68,16 @@ const App = () => {
   const handleSubmit = (event) => {
     event.preventDefault()
     if (!persons.find((person) => person.name === newName)) {
-      const newPerson = { name: newName, number: newNumber, id: persons.length + 1 }
-      setPersons(persons.concat(newPerson))
-      if (contains(newName, newFilter)) {
-        setPersonsToShow(personsToShow.concat(newPerson))
-      }
+      const newPerson = { name: newName, number: newNumber }
+      axios
+        .post('http://localhost:3001/persons', newPerson)
+        .then((response) => {
+          const returnedPerson = response.data
+          setPersons(persons.concat(returnedPerson))
+          if (contains(newName, newFilter)) {
+            setPersonsToShow(personsToShow.concat(returnedPerson))
+          }
+        })
       setNewName('')
       setNewNumber('')
     } else {
