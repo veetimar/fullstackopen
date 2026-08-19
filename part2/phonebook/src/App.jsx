@@ -82,7 +82,14 @@ const App = () => {
       setNewName('')
       setNewNumber('')
     } else {
-      alert(`${newName} is already added to phonebook`)
+      if (confirm(`${newName} is already in the phonebook, replace the old number with a new one?`)) {
+        const newPerson = { ...persons.find((person) => person.name === newName), number: newNumber }
+        personService.updatePerson(newPerson.id, newPerson).then((updatedPerson) => {
+          console.log(`Updated ${updatedPerson.name}`)
+          setPersons(persons.map((person) => person.id === updatedPerson.id ? updatedPerson : person))
+          setPersonsToShow(personsToShow.map((person) => person.id === updatedPerson.id ? updatedPerson : person))
+        })
+      }
     }
   }
 
