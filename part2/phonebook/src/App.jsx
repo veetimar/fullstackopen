@@ -5,9 +5,13 @@ const Notification = ({ message }) => {
   if (message === null) {
     return null
   }
-
+  let color = "green"
+  if (message.charAt(0) === "!") {
+    message = message.slice(1)
+    color = "red"
+  }
   const style = {
-    color: "green",
+    color: color,
     background: "lightgrey",
     fontSize: 20,
     borderStyle: "solid",
@@ -112,6 +116,11 @@ const App = () => {
           setPersons(persons.map((person) => person.id === updatedPerson.id ? updatedPerson : person))
           setPersonsToShow(personsToShow.map((person) => person.id === updatedPerson.id ? updatedPerson : person))
           setMessage(`Edited ${updatedPerson.name}`)
+          setTimeout(() => setMessage(null), 5000);
+        }).catch((e) => {
+          setMessage(`!${newName} has already been removed from the server`)
+          setPersons(persons.filter((person) => person.name !== newName))
+          setPersonsToShow(personsToShow.filter((person) => person.name !== newName))
           setTimeout(() => setMessage(null), 5000);
         })
       }
