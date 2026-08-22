@@ -1,6 +1,28 @@
 import { useState, useEffect } from 'react'
 import personService from './services/persons'
 
+const Notification = ({ message }) => {
+  if (message === null) {
+    return null
+  }
+
+  const style = {
+    color: "green",
+    background: "lightgrey",
+    fontSize: 20,
+    borderStyle: "solid",
+    borderRadius: 5,
+    padding: 10,
+    margin: 10
+  }
+
+  return (
+    <div style={style}>
+      <p style={{ margin: 0 }}>{message}</p>
+    </div>
+  )
+}
+
 const Filter = (props) => {
   return (
     <div>
@@ -43,6 +65,7 @@ const App = () => {
   const [newName, setNewName] = useState('')
   const [newNumber, setNewNumber] = useState('')
   const [newFilter, setNewFilter] = useState('')
+  const [message, setMessage] = useState(null)
 
   useEffect(() => {
     personService.getAll().then((initialPersons) => {
@@ -78,9 +101,9 @@ const App = () => {
         if (contains(newName, newFilter)) {
           setPersonsToShow(personsToShow.concat(returnedPerson))
         }
+        setMessage(`Added ${returnedPerson.name}`)
+        setTimeout(() => setMessage(null), 5000)
       })
-      setNewName('')
-      setNewNumber('')
     } else {
       if (confirm(`${newName} is already in the phonebook, replace the old number with a new one?`)) {
         const newPerson = { ...persons.find((person) => person.name === newName), number: newNumber }
@@ -88,9 +111,13 @@ const App = () => {
           console.log(`Updated ${updatedPerson.name}`)
           setPersons(persons.map((person) => person.id === updatedPerson.id ? updatedPerson : person))
           setPersonsToShow(personsToShow.map((person) => person.id === updatedPerson.id ? updatedPerson : person))
+          setMessage(`Edited ${updatedPerson.name}`)
+          setTimeout(() => setMessage(null), 5000);
         })
       }
     }
+    setNewName('')
+    setNewNumber('')
   }
 
   const handlePersonDeletion = (id) => {
@@ -106,6 +133,7 @@ const App = () => {
   return (
     <div>
       <h2>Phonebook</h2>
+      <Notification message={message} />
       <Filter newFilter={newFilter} handleFilter={handleFilterChange} />
       <h2>add a new</h2>
       <PersonForm handleSubmit={handleSubmit} newName={newName} handleName={handleNameChange} newNumber={newNumber} handleNumber={handleNumberChange} />

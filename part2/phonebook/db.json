@@ -24,6 +24,11 @@
       "name": "jorkki",
       "number": "100",
       "id": "rDw5ZVwneMI"
+    },
+    {
+      "name": "jorg",
+      "number": "99",
+      "id": "wl1FyS5q0wA"
     }
   ],
   "$schema": "./node_modules/json-server/schema.json"
