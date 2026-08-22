@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react'
 import countryService from './countries'
 
-const Countries = ({ countries }) => {
+const Countries = ({ countries, show }) => {
   if (countries.length === 0) {
     return null
   }
@@ -17,7 +17,11 @@ const Countries = ({ countries }) => {
   if (countries.length > 1) {
     return (
       <div>
-        {countries.map((country) => <div key={country.name.common}>{country.name.common}</div>)}
+        {countries.map((country) => (
+          <div key={country.name.common}>
+            {country.name.common} <button onClick={() => show(country.name.common)}>Show</button>
+          </div>
+        ))}
       </div>
     )
   }
@@ -25,7 +29,6 @@ const Countries = ({ countries }) => {
 }
 
 const CountryInfo = ({ country }) => {
-  console.log(country.languages)
   return (
     <div>
       <h1>{country.name.common}</h1>
@@ -69,10 +72,15 @@ const App = () => {
     setFiltered(countries.filter((country) => country.name.common.toLowerCase().includes(value.toLowerCase())))
   }
 
+  const showCountry = (name) => {
+    const country = countries.find((country) => country.name.common === name)
+    setFiltered([country])
+  }
+
   return (
     <>
       <Search value={newValue} onChange={handleChange} />
-      <Countries countries={filtered} />
+      <Countries countries={filtered} show={showCountry} />
     </>
   )
 }
