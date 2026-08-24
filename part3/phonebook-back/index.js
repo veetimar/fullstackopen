@@ -28,4 +28,10 @@ app.get('/api/persons', (req, res) => {
     res.json(persons)
 })
 
+app.get('/info', (req, res) => {
+    let html = `<p>Phonebook has info for ${persons.length} people</p>`
+    html += `<p>${Date()}</p>`
+    res.send(html)
+})
+
 app.listen(3001)
