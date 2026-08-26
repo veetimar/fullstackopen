@@ -24,18 +24,17 @@ app.use(morgan((tokens, req, res) => {
 app.get('/api/persons', (req, res, next) => {
     Person.find({}).then(result => {
         res.json(result)
-    }).catch(error => next(error))
+    }).catch(e => next(e))
 })
 
 app.get('/api/persons/:id', (req, res, next) => {
     const id = req.params.id
     Person.findById(id).then(result => {
-        if (result) {
-            res.json(result)
-        } else {
-            res.status(404).json({ error: 'person not found' })
+        if (!result) {
+            return res.status(404).json({ error: 'person not found' })
         }
-    }).catch(error => next(error))
+        res.json(result)
+    }).catch(e => next(e))
 })
 
 app.get('/info', (req, res) => {
@@ -48,7 +47,22 @@ app.delete('/api/persons/:id', (req, res, next) => {
     const id = req.params.id
     Person.findByIdAndDelete(id).then(result => {
         res.status(204).end()
-    }).catch(error => next(error))
+    }).catch(e => next(e))
+})
+
+app.put('/api/persons/:id', (req, res, next) => {
+    const id = req.params.id
+    const { name, number } = req.body
+    Person.findById(id).then(person => {
+        if (!person) {
+            return res.status(404).json({ error: 'person not found' })
+        }
+        person.name = name
+        person.number = number
+        person.save().then(result => {
+            res.json(result)
+        })
+    }).catch(e => next(e))
 })
 
 app.post('/api/persons', (req, res, next) => {
@@ -71,7 +85,7 @@ app.post('/api/persons', (req, res, next) => {
 
     person.save().then(result => {
         res.json(result)
-    }).catch(error => next(error))
+    }).catch(e => next(e))
 })
 
 const unknownEndpoint = (req, res) => {
