@@ -2,8 +2,10 @@ require('dotenv').config()
 const express = require('express')
 const morgan = require('morgan')
 const Person = require('./models/person')
+
 const app = express()
 
+app.use(express.static('dist'))
 app.use(express.json())
 
 morgan.token('body', (req, res) => JSON.stringify(req.body))
@@ -19,8 +21,6 @@ app.use(morgan((tokens, req, res) => {
     ].join(' ')
 }))
 
-app.use(express.static('dist'))
-
 app.get('/api/persons', (req, res) => {
     Person.find({}).then(result => {
         res.json(result)
@@ -30,9 +30,13 @@ app.get('/api/persons', (req, res) => {
 app.get('/api/persons/:id', (req, res) => {
     const id = req.params.id
     Person.findById(id).then(result => {
-        res.json(result)
+        if (result) {
+            res.json(result)
+        } else {
+            res.status(404).json({ error: 'person not found' })
+        }
     }).catch(e => {
-        res.status(404).end()
+        res.status(400).json({ error: 'malformatted id'})
     })
 })
 
@@ -44,13 +48,13 @@ app.get('/info', (req, res) => {
 
 app.delete('/api/persons/:id', (req, res) => {
     const id = req.params.id
-    persons = persons.filter((person) => person.id !== id)
-    res.status(204).end()
+    Person.findByIdAndDelete(id).then(result => {
+        res.status(204).end()
+    })
 })
 
 app.post('/api/persons', (req, res) => {
-    const name = req.body.name
-    const number = req.body.number
+    const { name, number } = req.body
 
     if (!name) {
         return res.status(400).json({ error: "name missing" })
@@ -71,6 +75,12 @@ app.post('/api/persons', (req, res) => {
         res.json(result)
     })
 })
+
+const unknownEndpoint = (req, res) => {
+  res.status(404).json({ error: 'unknown endpoint' })
+}
+
+app.use(unknownEndpoint)
 
 const PORT = process.env.PORT
 app.listen(PORT, () => {
