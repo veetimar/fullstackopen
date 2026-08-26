@@ -21,13 +21,13 @@ app.use(morgan((tokens, req, res) => {
     ].join(' ')
 }))
 
-app.get('/api/persons', (req, res) => {
+app.get('/api/persons', (req, res, next) => {
     Person.find({}).then(result => {
         res.json(result)
-    })
+    }).catch(error => next(error))
 })
 
-app.get('/api/persons/:id', (req, res) => {
+app.get('/api/persons/:id', (req, res, next) => {
     const id = req.params.id
     Person.findById(id).then(result => {
         if (result) {
@@ -35,9 +35,7 @@ app.get('/api/persons/:id', (req, res) => {
         } else {
             res.status(404).json({ error: 'person not found' })
         }
-    }).catch(e => {
-        res.status(400).json({ error: 'malformatted id'})
-    })
+    }).catch(error => next(error))
 })
 
 app.get('/info', (req, res) => {
@@ -46,14 +44,14 @@ app.get('/info', (req, res) => {
     res.send(html)
 })
 
-app.delete('/api/persons/:id', (req, res) => {
+app.delete('/api/persons/:id', (req, res, next) => {
     const id = req.params.id
     Person.findByIdAndDelete(id).then(result => {
         res.status(204).end()
-    })
+    }).catch(error => next(error))
 })
 
-app.post('/api/persons', (req, res) => {
+app.post('/api/persons', (req, res, next) => {
     const { name, number } = req.body
 
     if (!name) {
@@ -73,7 +71,7 @@ app.post('/api/persons', (req, res) => {
 
     person.save().then(result => {
         res.json(result)
-    })
+    }).catch(error => next(error))
 })
 
 const unknownEndpoint = (req, res) => {
@@ -81,6 +79,18 @@ const unknownEndpoint = (req, res) => {
 }
 
 app.use(unknownEndpoint)
+
+const errorHandler = (error, req, res, next) => {
+    console.error(error.message)
+
+    if (error.name === 'CastError') {
+        return res.status(400).json({ error: 'malformatted id'})
+    }
+
+    next(error)
+}
+
+app.use(errorHandler)
 
 const PORT = process.env.PORT
 app.listen(PORT, () => {
