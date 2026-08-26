@@ -38,9 +38,11 @@ app.get('/api/persons/:id', (req, res, next) => {
 })
 
 app.get('/info', (req, res) => {
-    let html = `<p>Phonebook has info for ${persons.length} people</p>`
-    html += `<p>${Date()}</p>`
-    res.send(html)
+    Person.find({}).then(result => {
+        let html = `<p>Phonebook has info for ${result.length} people</p>`
+        html += `<p>${Date()}</p>`
+        res.send(html)
+    })
 })
 
 app.delete('/api/persons/:id', (req, res, next) => {
