@@ -18,7 +18,7 @@ Content-Type: application/json
 
 {
     "name": "Jorkki",
-    "number": "100"
+    "number": "100-100100"
 }
 
 ###
@@ -27,5 +27,5 @@ Content-Type: application/json
 
 {
     "name": "Alisa",
-    "number": "04407654321"
+    "number": "044-07654321"
 }
