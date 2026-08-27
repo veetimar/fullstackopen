@@ -5,16 +5,16 @@ const Notification = ({ message }) => {
   if (message === null) {
     return null
   }
-  let color = "green"
-  if (message.charAt(0) === "!") {
+  let color = 'green'
+  if (message.charAt(0) === '!') {
     message = message.slice(1)
-    color = "red"
+    color = 'red'
   }
   const style = {
     color: color,
-    background: "lightgrey",
+    background: 'lightgrey',
     fontSize: 20,
-    borderStyle: "solid",
+    borderStyle: 'solid',
     borderRadius: 5,
     padding: 10,
     margin: 10
@@ -27,7 +27,7 @@ const Notification = ({ message }) => {
   )
 }
 
-const Filter = (props) => {
+const Filter = props => {
   return (
     <div>
       <p>
@@ -37,7 +37,7 @@ const Filter = (props) => {
   )
 }
 
-const PersonForm = (props) => {
+const PersonForm = props => {
   return (
     <div>
       <form onSubmit={props.handleSubmit}>
@@ -56,7 +56,7 @@ const PersonForm = (props) => {
 }
 
 const Persons = ({ persons, deletePerson }) => {
-  return (persons.map((person) => (
+  return (persons.map(person => (
     <div key={person.id}>
       {person.name} {person.number} <button onClick={() => deletePerson(person.id)}>delete</button> <br />
     </div>))
@@ -72,8 +72,8 @@ const App = () => {
   const [message, setMessage] = useState(null)
 
   useEffect(() => {
-    personService.getAll().then((initialPersons) => {
-      console.log("Got initial persons from server")
+    personService.getAll().then(initialPersons => {
+      console.log('Got initial persons from server')
       setPersons(initialPersons)
       setPersonsToShow(initialPersons)
     })
@@ -81,25 +81,25 @@ const App = () => {
 
   const contains = (string, substring) => string.toLocaleLowerCase().includes(substring.toLocaleLowerCase())
 
-  const handleFilterChange = (event) => {
+  const handleFilterChange = event => {
     const filter = event.target.value
-    setPersonsToShow(persons.filter((person) => contains(person.name, filter)))
+    setPersonsToShow(persons.filter(person => contains(person.name, filter)))
     setNewFilter(filter)
   }
 
-  const handleNameChange = (event) => {
+  const handleNameChange = event => {
     setNewName(event.target.value)
   }
 
-  const handleNumberChange = (event) => {
+  const handleNumberChange = event => {
     setNewNumber(event.target.value)
   }
 
-  const handleSubmit = (event) => {
+  const handleSubmit = event => {
     event.preventDefault()
-    if (!persons.find((person) => person.name === newName)) {
+    if (!persons.find(person => person.name === newName)) {
       const newPerson = { name: newName, number: newNumber }
-      personService.createPerson(newPerson).then((returnedPerson) => {
+      personService.createPerson(newPerson).then(returnedPerson => {
         setPersons(persons.concat(returnedPerson))
         if (contains(newName, newFilter)) {
           setPersonsToShow(personsToShow.concat(returnedPerson))
@@ -107,22 +107,22 @@ const App = () => {
         setMessage(`Added ${returnedPerson.name}`)
         setTimeout(() => setMessage(null), 5000)
       }).catch(e => {
-        setMessage("!" + e.response.data.error)
+        setMessage('!' + e.response.data.error)
         setTimeout(() => setMessage(null), 5000)
       })
     } else {
       if (confirm(`${newName} is already in the phonebook, replace the old number with a new one?`)) {
-        const newPerson = { ...persons.find((person) => person.name === newName), number: newNumber }
-        personService.updatePerson(newPerson.id, newPerson).then((updatedPerson) => {
-          setPersons(persons.map((person) => person.id === updatedPerson.id ? updatedPerson : person))
-          setPersonsToShow(personsToShow.map((person) => person.id === updatedPerson.id ? updatedPerson : person))
+        const newPerson = { ...persons.find(person => person.name === newName), number: newNumber }
+        personService.updatePerson(newPerson.id, newPerson).then(updatedPerson => {
+          setPersons(persons.map(person => person.id === updatedPerson.id ? updatedPerson : person))
+          setPersonsToShow(personsToShow.map(person => person.id === updatedPerson.id ? updatedPerson : person))
           setMessage(`Edited ${updatedPerson.name}`)
-          setTimeout(() => setMessage(null), 5000);
-        }).catch((e) => {
+          setTimeout(() => setMessage(null), 5000)
+        }).catch(() => {
           setMessage(`!${newName} has already been removed from the server`)
-          setPersons(persons.filter((person) => person.name !== newName))
-          setPersonsToShow(personsToShow.filter((person) => person.name !== newName))
-          setTimeout(() => setMessage(null), 5000);
+          setPersons(persons.filter(person => person.name !== newName))
+          setPersonsToShow(personsToShow.filter(person => person.name !== newName))
+          setTimeout(() => setMessage(null), 5000)
         })
       }
     }
@@ -130,11 +130,11 @@ const App = () => {
     setNewNumber('')
   }
 
-  const handlePersonDeletion = (id) => {
-    if (confirm(`Delete ${persons.find((person) => person.id == id).name}?`)) {
-      personService.deletePerson(id).then((deletedPerson) => {
-        setPersons(persons.filter((person) => person.id !== id))
-        setPersonsToShow(personsToShow.filter((person) => person.id !== id))
+  const handlePersonDeletion = id => {
+    if (confirm(`Delete ${persons.find(person => person.id === id).name}?`)) {
+      personService.deletePerson(id).then(() => {
+        setPersons(persons.filter(person => person.id !== id))
+        setPersonsToShow(personsToShow.filter(person => person.id !== id))
       })
     }
   }

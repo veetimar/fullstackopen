@@ -8,80 +8,80 @@ const app = express()
 app.use(express.static('dist'))
 app.use(express.json())
 
-morgan.token('body', (req, res) => JSON.stringify(req.body))
+morgan.token('body', req => JSON.stringify(req.body))
 
 app.use(morgan((tokens, req, res) => {
-    return [
-        tokens.method(req, res),
-        tokens.url(req, res),
-        tokens.status(req, res),
-        tokens.res(req, res, 'content-length'), '-',
-        tokens['response-time'](req, res), 'ms',
-        tokens.body(req, res)
-    ].join(' ')
+  return [
+    tokens.method(req, res),
+    tokens.url(req, res),
+    tokens.status(req, res),
+    tokens.res(req, res, 'content-length'), '-',
+    tokens['response-time'](req, res), 'ms',
+    tokens.body(req, res)
+  ].join(' ')
 }))
 
 app.get('/api/persons', (req, res, next) => {
-    Person.find({}).then(result => {
-        res.json(result)
-    }).catch(e => next(e))
+  Person.find({}).then(result => {
+    res.json(result)
+  }).catch(e => next(e))
 })
 
 app.get('/api/persons/:id', (req, res, next) => {
-    const id = req.params.id
-    Person.findById(id).then(result => {
-        if (!result) {
-            return res.status(404).json({ error: 'person not found' })
-        }
-        res.json(result)
-    }).catch(e => next(e))
+  const id = req.params.id
+  Person.findById(id).then(result => {
+    if (!result) {
+      return res.status(404).json({ error: 'person not found' })
+    }
+    res.json(result)
+  }).catch(e => next(e))
 })
 
 app.get('/info', (req, res) => {
-    Person.find({}).then(result => {
-        let html = `<p>Phonebook has info for ${result.length} people</p>`
-        html += `<p>${Date()}</p>`
-        res.send(html)
-    })
+  Person.find({}).then(result => {
+    let html = `<p>Phonebook has info for ${result.length} people</p>`
+    html += `<p>${Date()}</p>`
+    res.send(html)
+  })
 })
 
 app.delete('/api/persons/:id', (req, res, next) => {
-    const id = req.params.id
-    Person.findByIdAndDelete(id).then(result => {
-        res.status(204).end()
-    }).catch(e => next(e))
+  const id = req.params.id
+  Person.findByIdAndDelete(id).then(() => {
+    res.status(204).end()
+  }).catch(e => next(e))
 })
 
 app.put('/api/persons/:id', (req, res, next) => {
-    const id = req.params.id
-    const { name, number } = req.body
-    Person.findById(id).then(person => {
-        if (!person) {
-            return res.status(404).json({ error: 'person not found' })
-        }
-        person.name = name
-        person.number = number
-        person.save().then(result => {
-            res.json(result)
-        }).catch(e => next(e))
+  const id = req.params.id
+  const { name, number } = req.body
+  Person.findById(id).then(person => {
+    if (!person) {
+      return res.status(404).json({ error: 'person not found' })
+    }
+    person.name = name
+    person.number = number
+    person.save().then(result => {
+      res.json(result)
     }).catch(e => next(e))
+  }).catch(e => next(e))
 })
 
 app.post('/api/persons', (req, res, next) => {
-    const { name, number } = req.body
+  const { name, number } = req.body
 
-    // if (persons.find((person) => person.name === name)) {
-    //     return res.status(400).json({ error: "name must be unique" })
-    // }
+  // if (persons.find(person => person.name === name)) {
+  //   return res.status(400).json({ error: "name must be unique" })
+  // }
 
-    const person = new Person({
-        name,
-        number,
-    })
+  const person = new Person({
+    name,
+    number,
+  })
 
-    person.save().then(result => {
-        res.json(result)
-    }).catch(e => next(e))
+  person.save().then(result => {
+    res.json(result)
+  }).catch(e => next(e))
 })
 
 const unknownEndpoint = (req, res) => {
@@ -91,16 +91,16 @@ const unknownEndpoint = (req, res) => {
 app.use(unknownEndpoint)
 
 const errorHandler = (error, req, res, next) => {
-    console.error(error.message)
+  console.error(error.message)
 
-    if (error.name === 'CastError') {
-        return res.status(400).json({ error: 'malformatted id'})
-    }
-    if (error.name === 'ValidationError') {
-        return res.status(400).json({ error: error.message })
-    }
+  if (error.name === 'CastError') {
+    return res.status(400).json({ error: 'malformatted id' })
+  }
+  if (error.name === 'ValidationError') {
+    return res.status(400).json({ error: error.message })
+  }
 
-    next(error)
+  next(error)
 }
 
 app.use(errorHandler)
