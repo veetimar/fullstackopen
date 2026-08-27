@@ -63,19 +63,13 @@ app.put('/api/persons/:id', (req, res, next) => {
         person.number = number
         person.save().then(result => {
             res.json(result)
-        })
+        }).catch(e => next(e))
     }).catch(e => next(e))
 })
 
 app.post('/api/persons', (req, res, next) => {
     const { name, number } = req.body
 
-    if (!name) {
-        return res.status(400).json({ error: "name missing" })
-    }
-    if (!number) {
-        return res.status(400).json({ error: "number missing" })
-    }
     // if (persons.find((person) => person.name === name)) {
     //     return res.status(400).json({ error: "name must be unique" })
     // }
@@ -101,6 +95,9 @@ const errorHandler = (error, req, res, next) => {
 
     if (error.name === 'CastError') {
         return res.status(400).json({ error: 'malformatted id'})
+    }
+    if (error.name === 'ValidationError') {
+        return res.status(400).json({ error: error.message })
     }
 
     next(error)

@@ -106,6 +106,9 @@ const App = () => {
         }
         setMessage(`Added ${returnedPerson.name}`)
         setTimeout(() => setMessage(null), 5000)
+      }).catch(e => {
+        setMessage("!" + e.response.data.error)
+        setTimeout(() => setMessage(null), 5000)
       })
     } else {
       if (confirm(`${newName} is already in the phonebook, replace the old number with a new one?`)) {
