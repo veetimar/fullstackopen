@@ -24,29 +24,55 @@ const mostBlogs = (blogs) => {
     return null
   }
 
-  const authors = {}
+  const numberOfBlogs = {}
   for (let blog of blogs) {
     let author = blog.author
-    if (!authors.hasOwnProperty(author)) {
-      authors[author] = 0
+    if (!numberOfBlogs.hasOwnProperty(author)) {
+      numberOfBlogs[author] = 0
     }
-    authors[author] += 1
+    numberOfBlogs[author] += 1
   }
 
   let maxauthor = ""
   let maxblog = 0
-  for (let author in authors) {
-    if (authors[author] > maxblog) {
-      maxblog = authors[author]
+  for (let author in numberOfBlogs) {
+    if (numberOfBlogs[author] > maxblog) {
+      maxblog = numberOfBlogs[author]
       maxauthor = author
     }
   }
   return { author: maxauthor, blogs: maxblog }
 }
 
+const mostLikes = (blogs) => {
+  if (blogs.length === 0) {
+    return null
+  }
+
+  const likes = {}
+  for (let blog of blogs) {
+    let author = blog.author
+    if (!likes.hasOwnProperty(author)) {
+      likes[author] = 0
+    }
+    likes[author] += blog.likes
+  }
+
+  let maxauthor = ""
+  let maxlikes = 0
+  for (let author in likes) {
+    if (likes[author] > maxlikes) {
+      maxlikes = likes[author]
+      maxauthor = author
+    }
+  }
+  return { author: maxauthor, likes: maxlikes }
+}
+
 module.exports = {
   dummy,
   totalLikes,
   favouriteBlog,
-  mostBlogs
+  mostBlogs,
+  mostLikes
 }
