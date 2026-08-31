@@ -9,18 +9,17 @@ test('dummy returns one', () => {
   assert.strictEqual(result, 1)
 })
 
-describe('Total likes', () => {
-  const listWithOneBlog = [
-    {
-      _id: '5a422aa71b54a676234d17f8',
-      title: 'Go To Statement Considered Harmful',
-      author: 'Edsger W. Dijkstra',
-      url: 'https://homepages.cwi.nl/~storm/teaching/reader/Dijkstra68.pdf',
-      likes: 5,
-      __v: 0
-    }
-  ]
-  const blogs = [
+const listWithOneBlog = [
+  {
+    _id: '5a422aa71b54a676234d17f8',
+    title: 'Go To Statement Considered Harmful',
+    author: 'Edsger W. Dijkstra',
+    url: 'https://homepages.cwi.nl/~storm/teaching/reader/Dijkstra68.pdf',
+    likes: 5,
+    __v: 0
+  }
+]
+const blogs = [
   {
     _id: "5a422a851b54a676234d17f7",
     title: "React patterns",
@@ -71,6 +70,8 @@ describe('Total likes', () => {
   }  
 ]
 
+describe('Total likes', () => {
+
   test('of empty list is zero', () => {
     const result = listHelper.totalLikes([])
     assert.strictEqual(result, 0)
@@ -85,4 +86,20 @@ describe('Total likes', () => {
     const result = listHelper.totalLikes(blogs)
     assert.strictEqual(result, 36)
   })
+})
+
+describe('Favourite blog', () => {
+  test('of emply list is null', () => {
+    result = listHelper.favouriteBlog([])
+    assert.strictEqual(result, null)
+  })
+
+  test('when list has one blog equals that', () => {
+    result = listHelper.favouriteBlog(listWithOneBlog)
+    assert.deepStrictEqual(result, listWithOneBlog[0])
+  })
+
+  test('of a bigger list right blog is returned')
+  result = listHelper.favouriteBlog(blogs)
+  assert.deepStrictEqual(result, blogs[2])
 })
