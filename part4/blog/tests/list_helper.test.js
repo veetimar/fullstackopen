@@ -89,7 +89,7 @@ describe('Total likes', () => {
 })
 
 describe('Favourite blog', () => {
-  test('of emply list is null', () => {
+  test('of empty list is null', () => {
     result = listHelper.favouriteBlog([])
     assert.strictEqual(result, null)
   })
@@ -102,4 +102,21 @@ describe('Favourite blog', () => {
   test('of a bigger list right blog is returned')
   result = listHelper.favouriteBlog(blogs)
   assert.deepStrictEqual(result, blogs[2])
+})
+
+describe('Most blogs', () => {
+  test('of empty list return null', () => {
+    result = listHelper.mostBlogs([])
+    assert.strictEqual(result, null)
+  })
+
+  test('when list has one blog gives correct author', () => {
+    result = listHelper.mostBlogs(listWithOneBlog)
+    assert.deepStrictEqual(result, {author: 'Edsger W. Dijkstra', blogs: 1})
+  })
+
+  test('of a bigger list right author is returned', () => {
+    result = listHelper.mostBlogs(blogs)
+    assert.deepStrictEqual(result, {author: 'Robert C. Martin', blogs: 3})
+  })
 })
