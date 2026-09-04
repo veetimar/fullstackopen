@@ -74,11 +74,33 @@ test('get returns correct amount of blogs', async () => {
 })
 
 test('unique identifier is .id', async () => {
-  const blogs = await api
-    .get('/api/blogs')
-    .then(response => response.body)
+  const blogs = await getBlogs()
   blogs.forEach(blog => assert(blog.hasOwnProperty('id') && !blog.hasOwnProperty('_id')))
 })
+
+test('post works correctly', async () => {
+  const newBlog = {
+    title: 'Jaakon Keitot',
+    author: 'Meikämandoliini',
+    url: 'www.com',
+    likes: 3
+  }
+  const blog = await api
+    .post('/api/blogs')
+    .send(newBlog)
+    .expect(201)
+    .expect('Content-Type', /application\/json/)
+    .then(response => response.body)
+  assert(blog.title == newBlog.title)
+  const blogs = await getBlogs()
+  assert(blogs.length === initialBlogs.length + 1)
+  const titles = blogs.map(blog => blog.title)
+  assert(titles.includes(newBlog.title))
+})
+
+function getBlogs() {
+  return api.get('/api/blogs').then(response => response.body)
+}
 
 after(async () => {
   await mongoose.connection.close()
