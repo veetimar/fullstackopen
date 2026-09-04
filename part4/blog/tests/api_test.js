@@ -4,6 +4,7 @@ const mongoose = require('mongoose')
 const supertest = require('supertest')
 const app = require('../app')
 const Blog = require('../models/blog')
+const blog = require('../models/blog')
 
 api = supertest(app)
 
@@ -70,6 +71,13 @@ test('get returns correct amount of blogs', async () => {
     .expect('Content-Type', /application\/json/)
     .then(response => response.body)
   assert(blogs.length === initialBlogs.length)
+})
+
+test('unique identifier is .id', async () => {
+  const blogs = await api
+    .get('/api/blogs')
+    .then(response => response.body)
+  blogs.forEach(blog => assert(blog.hasOwnProperty('id') && !blog.hasOwnProperty('_id')))
 })
 
 after(async () => {
