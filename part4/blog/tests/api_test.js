@@ -98,6 +98,19 @@ test('post works correctly', async () => {
   assert(titles.includes(newBlog.title))
 })
 
+test('likes default to 0', async () => {
+  const newBlog = {
+    title: 'Jaanan Keitot',
+    author: 'Meikämanteliini',
+    url: 'www.com'
+  }
+  const blog = await api
+    .post('/api/blogs')
+    .send(newBlog)
+    .then(response => response.body)
+  assert(blog.likes === 0)
+})
+
 function getBlogs() {
   return api.get('/api/blogs').then(response => response.body)
 }
