@@ -111,6 +111,25 @@ test('likes default to 0', async () => {
   assert(blog.likes === 0)
 })
 
+test('return 400 if title or url missing', async () => {
+  const missingTitle = {
+    author: 'Meikämandariini',
+    url: 'www.com',
+  }
+  const missingUrl = {
+    title: 'Jaalin Keitot',
+    author: 'Meikämandariini'
+  }
+  await api
+    .post('/api/blogs')
+    .send(missingTitle)
+    .expect(400)
+  await api
+    .post('/api/blogs')
+    .send(missingUrl)
+    .expect(400)
+})
+
 function getBlogs() {
   return api.get('/api/blogs').then(response => response.body)
 }
