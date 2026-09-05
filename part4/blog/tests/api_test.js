@@ -130,6 +130,16 @@ test('return 400 if title or url missing', async () => {
     .expect(400)
 })
 
+test('delete works correctly', async () => {
+  const blogToDelete = (await getBlogs())[0]
+  await api
+    .delete(`/api/blogs/${blogToDelete.id}`)
+    .expect(204)
+  const blogsAtEnd = await getBlogs()
+  const ids = blogsAtEnd.map(b => b.id)
+  assert(!ids.includes(blogToDelete.id))
+})
+
 function getBlogs() {
   return api.get('/api/blogs').then(response => response.body)
 }
