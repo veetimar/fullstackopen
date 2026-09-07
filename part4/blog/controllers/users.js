@@ -12,6 +12,10 @@ router.post('/', async (request, response) => {
   const saltRounds = 10
   const passhash = await bcrypt.hash(password, saltRounds)
 
+  if (!(username && password) || (username.length < 3 || password.length < 3)) {
+    return response.status(400).json({error: 'Illegal username or password'})
+  }
+
   const user = new User({
     username,
     name,

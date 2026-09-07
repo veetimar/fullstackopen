@@ -2,10 +2,12 @@ const { test, after, beforeEach, describe } = require('node:test')
 const assert = require('node:assert')
 const mongoose = require('mongoose')
 const supertest = require('supertest')
+const bcrypt = require('bcrypt')
 const app = require('../app')
 const Blog = require('../models/blog')
+const User = require('../models/user')
 
-api = supertest(app)
+const api = supertest(app)
 
 const initialBlogs = [
     {
@@ -58,133 +60,182 @@ const initialBlogs = [
   }
 ]
 
-beforeEach(async () => {
-  await Blog.deleteMany({})
-  await Blog.insertMany(initialBlogs)
+describe('blogs', () => {
+  beforeEach(async () => {
+    await Blog.deleteMany({})
+    await Blog.insertMany(initialBlogs)
+  })
+
+  describe('getting blogs', () => {
+    test('get returns correct amount of blogs', async () => {
+      const blogs = await api
+        .get('/api/blogs')
+        .expect(200)
+        .expect('Content-Type', /application\/json/)
+        .then(response => response.body)
+      assert(blogs.length === initialBlogs.length)
+    })
+
+    test('unique identifier is .id', async () => {
+      const blogs = await getBlogs()
+      blogs.forEach(blog => assert(blog.hasOwnProperty('id') && !blog.hasOwnProperty('_id')))
+    })
+  })
+
+  describe('creating blogs', () => {
+    test('post works correctly', async () => {
+      const newBlog = {
+        title: 'Jaakon Keitot',
+        author: 'Meikämandoliini',
+        url: 'www.com',
+        likes: 3
+      }
+      const blog = await api
+        .post('/api/blogs')
+        .send(newBlog)
+        .expect(201)
+        .expect('Content-Type', /application\/json/)
+        .then(response => response.body)
+      assert(blog.title == newBlog.title)
+      const blogs = await getBlogs()
+      assert(blogs.length === initialBlogs.length + 1)
+      const titles = blogs.map(blog => blog.title)
+      assert(titles.includes(newBlog.title))
+    })
+
+    test('likes default to 0', async () => {
+      const newBlog = {
+        title: 'Jaanan Keitot',
+        author: 'Meikämanteliini',
+        url: 'www.com'
+      }
+      const blog = await api
+        .post('/api/blogs')
+        .send(newBlog)
+        .then(response => response.body)
+      assert(blog.likes === 0)
+    })
+
+    test('post returns 400 if title or url missing', async () => {
+      const missingTitle = {
+        author: 'Meikämandariini',
+        url: 'www.com',
+      }
+      const missingUrl = {
+        title: 'Jaalin Keitot',
+        author: 'Meikämandariini'
+      }
+      await api
+        .post('/api/blogs')
+        .send(missingTitle)
+        .expect(400)
+      await api
+        .post('/api/blogs')
+        .send(missingUrl)
+        .expect(400)
+    })
+  })
+
+  describe('deleting blogs', () => {
+    test('delete works correctly', async () => {
+      const blogToDelete = (await getBlogs())[0]
+      await api
+        .delete(`/api/blogs/${blogToDelete.id}`)
+        .expect(204)
+      const blogsAtEnd = await getBlogs()
+      const ids = blogsAtEnd.map(b => b.id)
+      assert(!ids.includes(blogToDelete.id))
+    })
+  })
+
+  describe('updating blogs', () => {
+    test('put works correctly', async () => {
+      const newBlog = {
+        title: 'Jarkon Sopat',
+        author: 'Lähiöläiset',
+        url: 'vvv.con',
+        likes: 4
+      }
+      const blogToUpdate = (await getBlogs())[0]
+      const updatedBlog = await api
+        .put(`/api/blogs/${blogToUpdate.id}`)
+        .send(newBlog)
+        .expect(200)
+        .then(response => response.body)
+      assert(updatedBlog.id === blogToUpdate.id)
+      const blogs = await getBlogs()
+      const titles = blogs.map(b => b.title)
+      assert(titles.includes(newBlog.title))
+    })
+
+    test('put returns 400 if title or url missing', async () => {
+      const missingTitle = {
+        author: 'Meikämandariini',
+        url: 'www.com',
+      }
+      const missingUrl = {
+        title: 'Jaalin Keitot',
+        author: 'Meikämandariini'
+      }
+      const blogToUpdate = (await getBlogs())[0]
+      await api
+        .put(`/api/blogs/${blogToUpdate.id}`)
+        .send(missingTitle)
+        .expect(400)
+      await api
+        .put(`/api/blogs/${blogToUpdate.id}`)
+        .send(missingUrl)
+        .expect(400)
+    })
+  })
 })
 
-describe('getting blogs', () => {
-  test('get returns correct amount of blogs', async () => {
-    const blogs = await api
-      .get('/api/blogs')
-      .expect(200)
-      .expect('Content-Type', /application\/json/)
-      .then(response => response.body)
-    assert(blogs.length === initialBlogs.length)
+describe('users', () => {
+  beforeEach(async () => {
+    const initialUsers = [
+      {
+        name: 'Jaakko',
+        username: 'Jaakko123',
+        passhash: await bcrypt.hash('salasana', 1),
+      }
+    ]
+    await User.deleteMany({})
+    await User.insertMany(initialUsers)
   })
 
-  test('unique identifier is .id', async () => {
-    const blogs = await getBlogs()
-    blogs.forEach(blog => assert(blog.hasOwnProperty('id') && !blog.hasOwnProperty('_id')))
+  describe('creating users', () => {
+    test('invalid user is not added', async () => {
+      const missingUsername = {
+        name: 'Jarkko',
+        password: 'lorps'
+      }
+      const tooShortPassword = {
+        username: 'jarkko123',
+        name: 'jarkko',
+        password: 'xd'
+      }
+      const anotherJaakko = {
+        username: 'Jaakko123',
+        name: 'Jaska',
+        password: '123455'
+      }
+
+      await api
+        .post('/api/users')
+        .send(missingUsername)
+        .expect(400)
+      await api
+        .post('/api/users')
+        .send(tooShortPassword)
+        .expect(400)
+      await api
+        .post('/api/users')
+        .send(anotherJaakko)
+        .expect(400)
+    })
   })
 })
 
-describe('creating blogs', () => {
-  test('post works correctly', async () => {
-    const newBlog = {
-      title: 'Jaakon Keitot',
-      author: 'Meikämandoliini',
-      url: 'www.com',
-      likes: 3
-    }
-    const blog = await api
-      .post('/api/blogs')
-      .send(newBlog)
-      .expect(201)
-      .expect('Content-Type', /application\/json/)
-      .then(response => response.body)
-    assert(blog.title == newBlog.title)
-    const blogs = await getBlogs()
-    assert(blogs.length === initialBlogs.length + 1)
-    const titles = blogs.map(blog => blog.title)
-    assert(titles.includes(newBlog.title))
-  })
-
-  test('likes default to 0', async () => {
-    const newBlog = {
-      title: 'Jaanan Keitot',
-      author: 'Meikämanteliini',
-      url: 'www.com'
-    }
-    const blog = await api
-      .post('/api/blogs')
-      .send(newBlog)
-      .then(response => response.body)
-    assert(blog.likes === 0)
-  })
-
-  test('post returns 400 if title or url missing', async () => {
-    const missingTitle = {
-      author: 'Meikämandariini',
-      url: 'www.com',
-    }
-    const missingUrl = {
-      title: 'Jaalin Keitot',
-      author: 'Meikämandariini'
-    }
-    await api
-      .post('/api/blogs')
-      .send(missingTitle)
-      .expect(400)
-    await api
-      .post('/api/blogs')
-      .send(missingUrl)
-      .expect(400)
-  })
-})
-
-describe('deleting blogs', () => {
-  test('delete works correctly', async () => {
-    const blogToDelete = (await getBlogs())[0]
-    await api
-      .delete(`/api/blogs/${blogToDelete.id}`)
-      .expect(204)
-    const blogsAtEnd = await getBlogs()
-    const ids = blogsAtEnd.map(b => b.id)
-    assert(!ids.includes(blogToDelete.id))
-  })
-})
-
-describe('updating blogs', () => {
-  test('put works correctly', async () => {
-    const newBlog = {
-      title: 'Jarkon Sopat',
-      author: 'Lähiöläiset',
-      url: 'vvv.con',
-      likes: 4
-    }
-    const blogToUpdate = (await getBlogs())[0]
-    const updatedBlog = await api
-      .put(`/api/blogs/${blogToUpdate.id}`)
-      .send(newBlog)
-      .expect(200)
-      .then(response => response.body)
-    assert(updatedBlog.id === blogToUpdate.id)
-    blogs = await getBlogs()
-    titles = blogs.map(b => b.title)
-    assert(titles.includes(newBlog.title))
-  })
-
-  test('put returns 400 if title or url missing', async () => {
-    const missingTitle = {
-      author: 'Meikämandariini',
-      url: 'www.com',
-    }
-    const missingUrl = {
-      title: 'Jaalin Keitot',
-      author: 'Meikämandariini'
-    }
-    const blogToUpdate = (await getBlogs())[0]
-    await api
-      .put(`/api/blogs/${blogToUpdate.id}`)
-      .send(missingTitle)
-      .expect(400)
-    await api
-      .put(`/api/blogs/${blogToUpdate.id}`)
-      .send(missingUrl)
-      .expect(400)
-  })
-})
 
 function getBlogs() {
   return api.get('/api/blogs').then(response => response.body)
