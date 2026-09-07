@@ -10,3 +10,16 @@ Content-Type: application/json
   "url": "http://testblog.com",
   "likes": 10
 }
+
+###
+GET http://localhost:3003/api/users
+
+###
+POST http://localhost:3003/api/users
+Content-Type: application/json
+
+{
+  "name": "Jaakko Jorma",
+  "username": "jergons",
+  "password": "Jaakon salaisuus"
+}
