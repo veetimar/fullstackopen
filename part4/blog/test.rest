@@ -3,7 +3,7 @@ GET http://localhost:3003/api/blogs
 ###
 POST http://localhost:3003/api/blogs
 Content-Type: application/json
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5c2VybmFtZSI6Im1sdXVra2FpIiwiaW
+Authorization: Bearer token
 
 {
   "title": "Test Blog",
@@ -11,6 +11,10 @@ Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5c2VybmFtZSI6Im1sdXVra2FpIiwiaW
   "url": "http://testblog.com",
   "likes": 10
 }
+
+###
+DELETE http://localhost:3003/api/blogs/id
+Authorization: Bearer token
 
 ###
 GET http://localhost:3003/api/users

@@ -24,7 +24,24 @@ router.post('/', async (request, response) => {
 })
 
 router.delete('/:id', async (request, response) => {
-  await Blog.findByIdAndDelete(request.params.id)
+  const userFromToken = jwt.verify(request.token, process.env.SECRET)
+  if (!userFromToken.id) {
+    throw new jwt.JsonWebTokenError('No id found')
+  }
+  const user = await User.findById(userFromToken.id)
+  const blog = await Blog.findById(request.params.id)
+
+  if (!blog) {
+    return response.status(404).end()
+  }
+
+  if (user._id.toString() !== blog.user.toString()) {
+    return response.status(401).json({ error: 'unauthorized' })
+  }
+  
+  await Blog.findByIdAndDelete(blog._id)
+  user.blogs = user.blogs.filter(b => b._id !== blog._id)
+  await user.save()
   response.status(204).end()
 })
 
