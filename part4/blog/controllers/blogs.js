@@ -3,23 +3,15 @@ const jwt = require('jsonwebtoken')
 const Blog = require('../models/blog')
 const User = require('../models/user')
 
-const getTokenFrom = request => {
-  const authorization = request.get('authorization')
-  if (authorization && authorization.startsWith('Bearer ')) {
-    return authorization.replace('Bearer ', '')
-  }
-  return null
-}
-
 router.get('/', async (request, response) => {
   const blogs = await Blog.find({}).populate('user', {name: 1, username: 1})
   response.json(blogs)
 })
 
 router.post('/', async (request, response) => {
-  const userFromToken = jwt.verify(getTokenFrom(request), process.env.SECRET)
+  const userFromToken = jwt.verify(request.token, process.env.SECRET)
   if (!userFromToken.id) {
-    throw new jwt.JsonWebTokenError()
+    throw new jwt.JsonWebTokenError('No id found')
   }
 
   const user = await User.findById(userFromToken.id)
