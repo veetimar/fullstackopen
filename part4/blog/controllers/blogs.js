@@ -1,20 +1,14 @@
 const router = require('express').Router()
-const jwt = require('jsonwebtoken')
 const Blog = require('../models/blog')
-const User = require('../models/user')
+const { userExtractor } = require('../utils/middleware')
 
 router.get('/', async (request, response) => {
   const blogs = await Blog.find({}).populate('user', {name: 1, username: 1})
   response.json(blogs)
 })
 
-router.post('/', async (request, response) => {
-  const userFromToken = jwt.verify(request.token, process.env.SECRET)
-  if (!userFromToken.id) {
-    throw new jwt.JsonWebTokenError('No id found')
-  }
-
-  const user = await User.findById(userFromToken.id)
+router.post('/', userExtractor, async (request, response) => {
+  const user = request.user
   const blog = new Blog({ ...request.body, user: user._id })
 
   const savedBlog = await blog.save()
@@ -23,12 +17,8 @@ router.post('/', async (request, response) => {
   response.status(201).json(savedBlog)
 })
 
-router.delete('/:id', async (request, response) => {
-  const userFromToken = jwt.verify(request.token, process.env.SECRET)
-  if (!userFromToken.id) {
-    throw new jwt.JsonWebTokenError('No id found')
-  }
-  const user = await User.findById(userFromToken.id)
+router.delete('/:id', userExtractor, async (request, response) => {
+  const user = request.user
   const blog = await Blog.findById(request.params.id)
 
   if (!blog) {
