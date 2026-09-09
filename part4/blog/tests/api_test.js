@@ -84,6 +84,7 @@ describe('blogs', () => {
 
   describe('creating blogs', () => {
     test('post works correctly', async () => {
+      const token = await getToken()
       const newBlog = {
         title: 'Jaakon Keitot',
         author: 'Meikämandoliini',
@@ -93,6 +94,7 @@ describe('blogs', () => {
       const blog = await api
         .post('/api/blogs')
         .send(newBlog)
+        .set({ Authorization: 'Bearer ' + token })
         .expect(201)
         .expect('Content-Type', /application\/json/)
         .then(response => response.body)
@@ -104,6 +106,7 @@ describe('blogs', () => {
     })
 
     test('likes default to 0', async () => {
+      const token = await getToken()
       const newBlog = {
         title: 'Jaanan Keitot',
         author: 'Meikämanteliini',
@@ -111,12 +114,14 @@ describe('blogs', () => {
       }
       const blog = await api
         .post('/api/blogs')
+        .set({ Authorization: 'Bearer ' + token })
         .send(newBlog)
         .then(response => response.body)
       assert(blog.likes === 0)
     })
 
     test('post returns 400 if title or url missing', async () => {
+      const token = await getToken()
       const missingTitle = {
         author: 'Meikämandariini',
         url: 'www.com',
@@ -128,11 +133,19 @@ describe('blogs', () => {
       await api
         .post('/api/blogs')
         .send(missingTitle)
+        .set({ Authorization: 'Bearer ' + token })
         .expect(400)
       await api
         .post('/api/blogs')
         .send(missingUrl)
+        .set({ Authorization: 'Bearer ' + token })
         .expect(400)
+    })
+
+    test('post returns 401 if token missins', async () => {
+      await api
+        .post('/api/blogs')
+        .expect(401)
     })
   })
 
@@ -235,6 +248,21 @@ describe('users', () => {
     })
   })
 })
+
+async function getToken() {
+  await User.deleteMany({})
+  const user = new User({
+    name: 'Jaakko',
+    username: 'Jaakko123',
+    passhash: await bcrypt.hash('salasana', 1),
+  })
+  await user.save()
+  const response = await api
+    .post('/api/login')
+    .send({ username: 'Jaakko123', password: 'salasana' })
+    .expect(200)
+  return response.body.token
+}
 
 
 function getBlogs() {
