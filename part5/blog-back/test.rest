@@ -1,0 +1,39 @@
+GET http://localhost:3003/api/blogs
+
+###
+POST http://localhost:3003/api/blogs
+Content-Type: application/json
+Authorization: Bearer token
+
+{
+  "title": "Test Blog",
+  "author": "Test Author",
+  "url": "http://testblog.com",
+  "likes": 10
+}
+
+###
+DELETE http://localhost:3003/api/blogs/id
+Authorization: Bearer token
+
+###
+GET http://localhost:3003/api/users
+
+###
+POST http://localhost:3003/api/users
+Content-Type: application/json
+
+{
+  "name": "Jaakko Jorma",
+  "username": "jergons",
+  "password": "Jaakon salaisuus"
+}
+
+###
+POST http://localhost:3003/api/login
+Content-Type: application/json
+
+{
+  "username": "jergons",
+  "password": "Jaakon salaisuus"
+}
