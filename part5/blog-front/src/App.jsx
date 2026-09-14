@@ -15,12 +15,25 @@ const App = () => {
     )  
   }, [])
 
+  useEffect(() => {
+    const user = window.localStorage.getItem('user')
+    if (user) {
+      setUser(JSON.parse(user))
+    }
+  }, [])
+
   const handleLoginSubmit = async event => {
     event.preventDefault()
     const user = await login({ username, password })
-    setUser(user)
     setUsername('')
     setPassword('')
+    setUser(user)
+    window.localStorage.setItem('user', JSON.stringify(user))
+  }
+
+  const handleLogout = event => {
+    setUser(null)
+    window.localStorage.removeItem('user')
   }
 
   const loginform = () => (
@@ -30,13 +43,13 @@ const App = () => {
         <div>
           <label>
             username
-            <input value={username} onChange={() => setUsername(event.target.value)} />
+            <input value={username} onChange={event => setUsername(event.target.value)} />
           </label>
         </div>
         <div>
           <label>
             password
-            <input type="password" value={password} onChange={() => setPassword(event.target.value)} />
+            <input type="password" value={password} onChange={event => setPassword(event.target.value)} />
           </label>
         </div>
         <button>Submit</button>
@@ -46,7 +59,7 @@ const App = () => {
 
   return (
     <div>
-      {user && <Blogs blogs={blogs} user={user} />}
+      {user && <Blogs blogs={blogs} user={user} onLogout={handleLogout} />}
       {!user && loginform()}
     </div>
   )
