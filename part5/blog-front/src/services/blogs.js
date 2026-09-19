@@ -30,4 +30,9 @@ const update = (newObject, id) => {
   return response.then(response => response.data)
 }
 
-export default { getAll, create, setToken, update }
+const remove = id => {
+  const config = getConfig()
+  return axios.delete(`${baseUrl}/${id}`, config)
+}
+
+export default { getAll, create, setToken, update, remove }

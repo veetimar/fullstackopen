@@ -75,6 +75,23 @@ const App = () => {
     setBlogs(sortBlogs(newBlogs))
   }
 
+  const deleteBlog = async blog => {
+    if (!confirm(`Remove blog ${blog.title}?`)) {
+      return
+    }
+    const id = blog.id
+    try {
+      await blogService.remove(id)
+    } catch {
+      setNotification('Blog deletion failed')
+      setTimeout(() => setNotification(''), 5000)
+      return
+    }
+    setBlogs(blogs.filter(b => b.id !== id))
+    setNotification('Deleted blog')
+    setTimeout(() => setNotification(''), 5000)
+  }
+
   const handleLogout = () => {
     setUser(null)
     window.localStorage.removeItem('user')
@@ -93,7 +110,7 @@ const App = () => {
       <Togglable buttonLabel='Create new blog' ref={blogFormRef} >
         <BlogForm createBlog={HandleBlogCreation} />
       </Togglable>
-      <Blogs blogs={blogs} like={likeBlog} />
+      <Blogs blogs={blogs} like={likeBlog} remove={deleteBlog} user={user} />
     </div>
   )
 
