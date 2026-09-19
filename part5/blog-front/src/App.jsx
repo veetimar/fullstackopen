@@ -13,7 +13,7 @@ const App = () => {
   const [notification, setNotification] = useState('')
 
   useEffect(() => {
-    blogService.getAll().then(blogs => setBlogs(blogs))  
+    blogService.getAll().then(blogs => setBlogs(sortBlogs(blogs)))  
   }, [])
 
   useEffect(() => {
@@ -26,6 +26,10 @@ const App = () => {
   }, [])
 
   const blogFormRef = useRef()
+
+  const sortBlogs = (blogs) => {
+    return blogs.toSorted((a, b) => b.likes - a.likes)
+  }
 
   const handleLogin = async (username, password) => {
     let user
@@ -68,7 +72,7 @@ const App = () => {
     }
     const returnedBlog = await blogService.update(newBlog, blogToUpdate.id)
     let newBlogs = blogs.map(blog => blog.id === blogToUpdate.id ? returnedBlog : blog)
-    setBlogs(newBlogs)
+    setBlogs(sortBlogs(newBlogs))
   }
 
   const handleLogout = () => {
