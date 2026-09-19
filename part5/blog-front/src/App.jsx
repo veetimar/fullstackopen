@@ -13,7 +13,7 @@ const App = () => {
   const [notification, setNotification] = useState('')
 
   useEffect(() => {
-    blogService.getAll().then(blogs => setBlogs(sortBlogs(blogs)))  
+    blogService.getAll().then(blogs => setBlogs(sortBlogs(blogs)))
   }, [])
 
   useEffect(() => {
@@ -51,7 +51,7 @@ const App = () => {
     blogFormRef.current.toggleVisibility()
     let blog
     try {
-      blog = await blogService.create({ title, author, url})
+      blog = await blogService.create({ title, author, url })
     } catch {
       setNotification('Blog creation failed')
       setTimeout(() => setNotification(''), 5000)
