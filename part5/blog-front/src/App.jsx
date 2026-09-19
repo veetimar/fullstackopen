@@ -58,6 +58,19 @@ const App = () => {
     setTimeout(() => setNotification(''), 5000)
   }
 
+  const likeBlog = async (blogToUpdate) => {
+    const newBlog = {
+      user: blogToUpdate.user.id,
+      likes: blogToUpdate.likes + 1,
+      author: blogToUpdate.author,
+      title: blogToUpdate.title,
+      url: blogToUpdate.url
+    }
+    const returnedBlog = await blogService.update(newBlog, blogToUpdate.id)
+    let newBlogs = blogs.map(blog => blog.id === blogToUpdate.id ? returnedBlog : blog)
+    setBlogs(newBlogs)
+  }
+
   const handleLogout = () => {
     setUser(null)
     window.localStorage.removeItem('user')
@@ -76,7 +89,7 @@ const App = () => {
       <Togglable buttonLabel='Create new blog' ref={blogFormRef} >
         <BlogForm createBlog={HandleBlogCreation} />
       </Togglable>
-      <Blogs blogs={blogs} />
+      <Blogs blogs={blogs} like={likeBlog} />
     </div>
   )
 

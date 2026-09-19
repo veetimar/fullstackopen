@@ -12,6 +12,7 @@ router.post('/', userExtractor, async (request, response) => {
   const blog = new Blog({ ...request.body, user: user._id })
 
   const savedBlog = await blog.save()
+  await savedBlog.populate('user', {name: 1, username: 1})
   user.blogs = user.blogs.concat(savedBlog._id)
   await user.save()
   response.status(201).json(savedBlog)
@@ -35,17 +36,26 @@ router.delete('/:id', userExtractor, async (request, response) => {
   response.status(204).end()
 })
 
-router.put('/:id', async (request, response) => {
+router.put('/:id', userExtractor, async (request, response) => {
+  const user = request.user
   const blog = await Blog.findById(request.params.id)
+
   if (!blog) {
     return response.status(404).end()
   }
-  const { title, author, url, likes } = request.body
+
+  if (user._id.toString() !== blog.user.toString()) {
+    return response.status(401).json({ error: 'unauthorized' })
+  }
+
+  const { title, author, url, likes, user: requestUser} = request.body
   blog.title = title
   blog.author = author
   blog.url = url
   blog.likes = likes
+  blog.user = requestUser
   const updatedBlog = await blog.save()
+  await updatedBlog.populate('user', {name: 1, username: 1})
   response.json(updatedBlog)
 })
 
