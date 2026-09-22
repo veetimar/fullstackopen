@@ -10,7 +10,7 @@ const BlogForm = ({ createBlog }) => {
     setTitle('')
     setAuthor('')
     setUrl('')
-    createBlog(title, author, url)
+    createBlog({ title, author, url })
   }
 
   return (

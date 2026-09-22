@@ -47,11 +47,11 @@ const App = () => {
     setTimeout(() => setNotification(''), 5000)
   }
 
-  const HandleBlogCreation = async (title, author, url) => {
+  const HandleBlogCreation = async (newBlog) => {
     blogFormRef.current.toggleVisibility()
     let blog
     try {
-      blog = await blogService.create({ title, author, url })
+      blog = await blogService.create(newBlog)
     } catch {
       setNotification('Blog creation failed')
       setTimeout(() => setNotification(''), 5000)
