@@ -39,3 +39,15 @@ test('blog renders correctly after view is clicked', async () => {
   expect(url).toBeVisible()
   expect(likes).toBeVisible()
 })
+
+test('when liking blogs, event handler is called', async () => {
+  const likeHandler = vi.fn()
+  render(<Blog blog={blog} user={blogUser} like={likeHandler} />)
+  const user = userEvent.setup()
+  const viewButton = screen.getByText('view')
+  const likeButton = screen.getByText('like')
+  await user.click(viewButton)
+  await user.click(likeButton)
+  await user.click(likeButton)
+  expect(likeHandler.mock.calls).toHaveLength(2)
+})
