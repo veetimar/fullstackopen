@@ -1,20 +1,21 @@
 import { screen, render } from '@testing-library/react'
+import userEvent from '@testing-library/user-event'
 import Blog from './Blog'
 
-test('blog renders correctly at start', async () => {
-  const user = {
-    name: 'Matti',
-    username: 'mmatt',
-  }
-  const blog = {
-    title: 'React patterns',
-    author: 'Michael Chan',
-    url: 'https://reactpatterns.com/',
-    likes: 7,
-    user: user
-  }
+const blogUser = {
+  name: 'Matti',
+  username: 'mmatt',
+}
+const blog = {
+  title: 'React patterns',
+  author: 'Michael Chan',
+  url: 'https://reactpatterns.com/',
+  likes: 7,
+  user: blogUser
+}
 
-  render(<Blog blog={blog} user={user} />)
+test('blog renders correctly at start', () => {
+  render(<Blog blog={blog} user={blogUser} />)
 
   const title = screen.getByText('React patterns', { exact: false })
   const author = screen.getByText('Michael Chan', { exact: false })
@@ -24,4 +25,17 @@ test('blog renders correctly at start', async () => {
   expect(author).toBeVisible()
   expect(url).not.toBeVisible()
   expect(likes).not.toBeVisible()
+})
+
+test('blog renders correctly after view is clicked', async () => {
+  render(<Blog blog={blog} user={blogUser} />)
+
+  const user = userEvent.setup()
+  const button = screen.getByText('view')
+  await user.click(button)
+
+  const url = screen.getByText('https://reactpatterns.com/', { exact: false })
+  const likes = screen.getByText('7', { exact: false })
+  expect(url).toBeVisible()
+  expect(likes).toBeVisible()
 })
