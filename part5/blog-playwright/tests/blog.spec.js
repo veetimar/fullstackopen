@@ -1,16 +1,10 @@
 const { test, expect, beforeEach, describe } = require('@playwright/test')
-const { login, createBlog } = require('./helper')
+const { login, logout, createBlog, createUser } = require('./helper')
 
 describe('Blog app', () => {
   beforeEach(async ({ page, request }) => {
     await request.post('/api/testing/reset')
-    await request.post('/api/users', {
-      data: {
-        username: 'testing',
-        name: 'Teppo Testaaja',
-        password: 'salaisuus'
-      }
-    })
+    await createUser(request, 'testing', 'Teppo Testaaja', 'salaisuus')
     await page.goto('/')
   })
 
@@ -42,30 +36,44 @@ describe('Blog app', () => {
     })
 
     test('a new blog can be created', async ({ page }) => {
-      createBlog(page, 'otsikko', 'tekijä', 'osoite')
+      await createBlog(page, 'otsikko', 'tekijä', 'osoite')
       await expect(page.getByText('otsikko tekijä')).toBeVisible()
     })
 
     describe('and a blog is created', () => {
-      beforeEach(({ page }) => {
-        createBlog(page, 'otsikko', 'tekijä', 'osoite')
+      beforeEach(async ({ page }) => {
+        await createBlog(page, 'otsikko', 'tekijä', 'osoite')
       })
 
       test('blog can be liked', async ({ page }) => {
         const blog = page.getByText('otsikko tekijä').locator('..')
-        await blog.getByRole('button').click()
+        await blog.getByRole('button', { name: 'view' }).click()
         const likeElement = blog.getByText('likes')
         await expect(likeElement).toContainText('0')
-        await likeElement.getByRole('button').click()
+        await likeElement.getByRole('button', { name: 'like' }).click()
         await expect(likeElement).toContainText('1')
       })
 
       test('blog can be deleted', async ({ page }) => {
         const blog = page.getByText('otsikko tekijä').locator('..')
-        await blog.getByRole('button').click()
+        await blog.getByRole('button', { name: 'view' }).click()
         page.on('dialog', dialog => dialog.accept())
         await blog.getByRole('button', { name: 'remove' }).click()
         await expect(page.getByText('otsikko tekijä')).not.toBeVisible()
+      })
+
+      describe('With other user logged in', () => {
+        beforeEach(async ({ page, request }) => {
+          logout(page)
+          await createUser(request, 'toinen', 'Toinen Toimittaja', 'salaisuus2')
+          login(page, 'toinen', 'salaisuus2')
+        })
+
+        test('someone else\'s blog cannot be deleted', async ({ page }) => {
+          const blog = page.getByText('otsikko tekijä').locator('..')
+          await blog.getByRole('button', { name: 'view' }).click()
+          await expect(blog.getByRole('button', { name: 'remove' })).not.toBeVisible()
+        })
       })
     })
   })
