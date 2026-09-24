@@ -1,5 +1,5 @@
 const { test, expect, beforeEach, describe } = require('@playwright/test')
-const { login, logout, createBlog, createUser } = require('./helper')
+const { login, logout, createBlog, createUser, likeBlog } = require('./helper')
 
 describe('Blog app', () => {
   beforeEach(async ({ page, request }) => {
@@ -40,17 +40,17 @@ describe('Blog app', () => {
       await expect(page.getByText('otsikko tekijä')).toBeVisible()
     })
 
-    describe('and a blog is created', () => {
+    describe('and a few blogs are created', () => {
       beforeEach(async ({ page }) => {
         await createBlog(page, 'otsikko', 'tekijä', 'osoite')
+        await createBlog(page, 'toinen otsikko', 'toinen tekijä', 'toinen osoite')
+        await createBlog(page, 'kolmas otsikko', 'kolmas tekijä', 'kolmas osoite')
       })
 
       test('blog can be liked', async ({ page }) => {
-        const blog = page.getByText('otsikko tekijä').locator('..')
-        await blog.getByRole('button', { name: 'view' }).click()
-        const likeElement = blog.getByText('likes')
+        const likeElement = page.getByText('otsikko tekijä').locator('..').getByText('likes')
         await expect(likeElement).toContainText('0')
-        await likeElement.getByRole('button', { name: 'like' }).click()
+        await likeBlog(page, 'otsikko tekijä')
         await expect(likeElement).toContainText('1')
       })
 
@@ -60,6 +60,16 @@ describe('Blog app', () => {
         page.on('dialog', dialog => dialog.accept())
         await blog.getByRole('button', { name: 'remove' }).click()
         await expect(page.getByText('otsikko tekijä')).not.toBeVisible()
+      })
+
+      test('blogs are in correct order', async ({ page }) => {
+        await likeBlog(page, 'kolmas otsikko kolmas tekijä')
+        await likeBlog(page, 'toinen otsikko toinen tekijä')
+        await likeBlog(page, 'toinen otsikko toinen tekijä')
+        const blogs = page.locator('.blog')
+        await expect(blogs.nth(0)).toContainText('toinen otsikko toinen tekijä',)
+        await expect(blogs.nth(1)).toContainText('kolmas otsikko kolmas tekijä',)
+        await expect(blogs.nth(2)).toContainText('otsikko tekijä',)
       })
 
       describe('With other user logged in', () => {

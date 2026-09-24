@@ -21,4 +21,16 @@ const createUser = async (request, username, name, password) => {
   await request.post('/api/users', { data: { username, name, password } })
 }
 
-module.exports = { login, logout, createBlog, createUser }
+const likeBlog = async (page, query) => {
+  const blog = page.getByText(query).locator('..')
+  const likeElement = blog.getByText('likes')
+  const likes = Number((await likeElement.textContent()).split(" ")[1])
+  const likeButton =  likeElement.getByRole('button', { name: 'like' })
+  if (!await likeButton.isVisible()) {
+    await blog.getByRole('button', { name: 'view' }).click()
+  }
+  await likeButton.click()
+  await likeElement.getByText(likes + 1).waitFor()
+}
+
+module.exports = { login, logout, createBlog, createUser, likeBlog }
