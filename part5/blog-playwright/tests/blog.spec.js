@@ -59,6 +59,14 @@ describe('Blog app', () => {
         await likeElement.getByRole('button').click()
         await expect(likeElement).toContainText('1')
       })
+
+      test('blog can be deleted', async ({ page }) => {
+        const blog = page.getByText('otsikko tekijä').locator('..')
+        await blog.getByRole('button').click()
+        page.on('dialog', dialog => dialog.accept())
+        await blog.getByRole('button', { name: 'remove' }).click()
+        await expect(page.getByText('otsikko tekijä')).not.toBeVisible()
+      })
     })
   })
 })
