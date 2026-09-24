@@ -1,5 +1,5 @@
 const { test, expect, beforeEach, describe } = require('@playwright/test')
-const { login } = require('./helper')
+const { login, createBlog } = require('./helper')
 
 describe('Blog app', () => {
   beforeEach(async ({ page, request }) => {
@@ -37,17 +37,28 @@ describe('Blog app', () => {
   })
 
   describe('When logged in', () => {
-    beforeEach(async ({ page }) => {
+    beforeEach(({ page }) => {
       login(page, 'testing', 'salaisuus')
     })
 
     test('a new blog can be created', async ({ page }) => {
-      await page.getByRole('button', { name: 'create new blog' }).click()
-      await page.getByLabel('title').fill('otsikko')
-      await page.getByLabel('author').fill('tekijä')
-      await page.getByLabel('url').fill('osoite')
-      await page.getByRole('button', { name: 'create' }).click()
+      createBlog(page, 'otsikko', 'tekijä', 'osoite')
       await expect(page.getByText('otsikko tekijä')).toBeVisible()
+    })
+
+    describe('and a blog is created', () => {
+      beforeEach(({ page }) => {
+        createBlog(page, 'otsikko', 'tekijä', 'osoite')
+      })
+
+      test('blog can be liked', async ({ page }) => {
+        const blog = page.getByText('otsikko tekijä').locator('..')
+        await blog.getByRole('button').click()
+        const likeElement = blog.getByText('likes')
+        await expect(likeElement).toContainText('0')
+        await likeElement.getByRole('button').click()
+        await expect(likeElement).toContainText('1')
+      })
     })
   })
 })
