@@ -13,7 +13,7 @@ const Notification = ({ text }) => {
     return null
   }
   return (
-    <div style={style} class="notification">
+    <div style={style} className="notification">
       {text}
     </div>
   )

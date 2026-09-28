@@ -1,16 +1,18 @@
 import { useState, useEffect, useRef } from 'react'
+import { Route, Routes, Link, useNavigate } from 'react-router-dom'
+import blogService from './services/blogs'
+import login from './services/login'
 import Blogs from './components/Blogs'
 import Login from './components/Login'
 import BlogForm from './components/BlogForm'
 import Notification from './components/Notification'
 import Togglable from './components/Togglable'
-import blogService from './services/blogs'
-import login from './services/login'
 
 const App = () => {
   const [blogs, setBlogs] = useState([])
   const [user, setUser] = useState(null)
   const [notification, setNotification] = useState('')
+  const navigate = useNavigate()
 
   useEffect(() => {
     blogService.getAll().then(blogs => setBlogs(sortBlogs(blogs)))
@@ -45,6 +47,7 @@ const App = () => {
     blogService.setToken(user.token)
     setNotification('Login succesful')
     setTimeout(() => setNotification(''), 5000)
+    navigate('/')
   }
 
   const HandleBlogCreation = async (newBlog) => {
@@ -98,27 +101,25 @@ const App = () => {
     blogService.setToken('')
     setNotification('Logout succesful')
     setTimeout(() => setNotification(''), 5000)
+    navigate('/')
   }
 
-  const loginSuccesful = () => (
-    <div>
-      <h2>Blogs</h2>
-      <p>
-        {user.name} logged in
-        <button onClick={handleLogout}>logout</button>
-      </p>
-      <Togglable buttonLabel='Create new blog' ref={blogFormRef} >
-        <BlogForm createBlog={HandleBlogCreation} />
-      </Togglable>
-      <Blogs blogs={blogs} like={likeBlog} remove={deleteBlog} user={user} />
-    </div>
-  )
+  const margin = {
+    margin: 5
+  }
 
   return (
     <div>
       <Notification text={notification}/>
-      {user && loginSuccesful()}
-      {!user && <Login login={handleLogin} />}
+      <div>
+        <Link to='/' style={margin}>home</Link>
+        {!user && <Link to='/login' style={margin}>login</Link>}
+        {user && <button onClick={handleLogout} style={margin}>logout</button>}
+      </div>
+      <Routes>
+        <Route path='/' element={<Blogs blogs={blogs} like={likeBlog} remove={deleteBlog} user={user} />} />
+        <Route path='/login' element={<Login login={handleLogin} />} />
+      </Routes>
     </div>
   )
 }
