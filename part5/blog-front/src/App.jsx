@@ -1,7 +1,8 @@
 import { useState, useEffect, useRef } from 'react'
-import { Route, Routes, Link, useNavigate } from 'react-router-dom'
+import { Route, Routes, Link, useNavigate, useMatch } from 'react-router-dom'
 import blogService from './services/blogs'
 import login from './services/login'
+import Blog from './components/Blog'
 import Blogs from './components/Blogs'
 import Login from './components/Login'
 import BlogForm from './components/BlogForm'
@@ -13,6 +14,8 @@ const App = () => {
   const [user, setUser] = useState(null)
   const [notification, setNotification] = useState('')
   const navigate = useNavigate()
+  const blogFormRef = useRef()
+  const match = useMatch('/blogs/:id')
 
   useEffect(() => {
     blogService.getAll().then(blogs => setBlogs(sortBlogs(blogs)))
@@ -27,7 +30,7 @@ const App = () => {
     }
   }, [])
 
-  const blogFormRef = useRef()
+  const blog = match ? blogs.find(b => b.id === match.params.id) : null
 
   const sortBlogs = (blogs) => {
     return blogs.toSorted((a, b) => b.likes - a.likes)
@@ -93,6 +96,7 @@ const App = () => {
     setBlogs(blogs.filter(b => b.id !== id))
     setNotification('Deleted blog')
     setTimeout(() => setNotification(''), 5000)
+    navigate('/')
   }
 
   const handleLogout = () => {
@@ -119,6 +123,7 @@ const App = () => {
       <Routes>
         <Route path='/' element={<Blogs blogs={blogs} like={likeBlog} remove={deleteBlog} user={user} />} />
         <Route path='/login' element={<Login login={handleLogin} />} />
+        <Route path='/blogs/:id' element={<Blog blog={blog} like={likeBlog} remove={deleteBlog} user={user} />} />
       </Routes>
     </div>
   )

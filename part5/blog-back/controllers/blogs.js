@@ -44,7 +44,7 @@ router.put('/:id', userExtractor, async (request, response) => {
     return response.status(404).end()
   }
 
-  if (user._id.toString() !== blog.user.toString()) {
+  if (!user) {
     return response.status(401).json({ error: 'unauthorized' })
   }
 
