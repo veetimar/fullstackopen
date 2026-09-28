@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react'
+import { useState, useEffect } from 'react'
 import { Route, Routes, Link, useNavigate, useMatch } from 'react-router-dom'
 import blogService from './services/blogs'
 import login from './services/login'
@@ -7,14 +7,12 @@ import Blogs from './components/Blogs'
 import Login from './components/Login'
 import BlogForm from './components/BlogForm'
 import Notification from './components/Notification'
-import Togglable from './components/Togglable'
 
 const App = () => {
   const [blogs, setBlogs] = useState([])
   const [user, setUser] = useState(null)
   const [notification, setNotification] = useState('')
   const navigate = useNavigate()
-  const blogFormRef = useRef()
   const match = useMatch('/blogs/:id')
 
   useEffect(() => {
@@ -54,7 +52,6 @@ const App = () => {
   }
 
   const HandleBlogCreation = async (newBlog) => {
-    blogFormRef.current.toggleVisibility()
     let blog
     try {
       blog = await blogService.create(newBlog)
@@ -66,6 +63,7 @@ const App = () => {
     setBlogs(blogs.concat(blog))
     setNotification('Created blog ' + blog.title)
     setTimeout(() => setNotification(''), 5000)
+    navigate('/')
   }
 
   const likeBlog = async (blogToUpdate) => {
@@ -117,11 +115,13 @@ const App = () => {
       <Notification text={notification}/>
       <div>
         <Link to='/' style={margin}>home</Link>
+        <Link to='/create' style={margin}>new blog</Link>
         {!user && <Link to='/login' style={margin}>login</Link>}
         {user && <button onClick={handleLogout} style={margin}>logout</button>}
       </div>
       <Routes>
-        <Route path='/' element={<Blogs blogs={blogs} like={likeBlog} remove={deleteBlog} user={user} />} />
+        <Route path='/' element={<Blogs blogs={blogs} />} />
+        <Route path='create' element={<BlogForm createBlog={HandleBlogCreation} />} />
         <Route path='/login' element={<Login login={handleLogin} />} />
         <Route path='/blogs/:id' element={<Blog blog={blog} like={likeBlog} remove={deleteBlog} user={user} />} />
       </Routes>
