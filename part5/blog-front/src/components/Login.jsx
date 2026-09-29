@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { Button, Input } from './Styled'
 
 const Login = ({ login }) => {
   const [username, setUsername] = useState('')
@@ -18,16 +19,16 @@ const Login = ({ login }) => {
         <div>
           <label>
             username
-            <input value={username} onChange={event => setUsername(event.target.value)} />
+            <Input value={username} onChange={event => setUsername(event.target.value)} />
           </label>
         </div>
         <div>
           <label>
             password
-            <input type="password" value={password} onChange={event => setPassword(event.target.value)} />
+            <Input type="password" value={password} onChange={event => setPassword(event.target.value)} />
           </label>
         </div>
-        <button>Login</button>
+        <Button>Login</Button>
       </form>
     </div>
   )
