@@ -1,21 +1,13 @@
-const Notification = ({ text }) => {
-  const style = {
-    color: 'grey',
-    background: 'lightgrey',
-    fontSize: 20,
-    borderStyle: 'solid',
-    borderRadius: 5,
-    padding: 10,
-    marginBottom: 10,
-  }
+import { Alert } from './Styled'
 
+const Notification = ({ text }) => {
   if (!text) {
     return null
   }
   return (
-    <div style={style} className="notification">
+    <Alert className="notification">
       {text}
-    </div>
+    </Alert>
   )
 }
 

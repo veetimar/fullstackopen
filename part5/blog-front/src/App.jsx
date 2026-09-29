@@ -7,6 +7,7 @@ import Blogs from './components/Blogs'
 import Login from './components/Login'
 import BlogForm from './components/BlogForm'
 import Notification from './components/Notification'
+import { FakeButton, Navigation } from './components/Styled'
 
 const App = () => {
   const [blogs, setBlogs] = useState([])
@@ -112,13 +113,13 @@ const App = () => {
 
   return (
     <div>
-      <Notification text={notification}/>
-      <div>
+      <Navigation>
         <Link to='/' style={margin}>home</Link>
         <Link to='/create' style={margin}>new blog</Link>
         {!user && <Link to='/login' style={margin}>login</Link>}
-        {user && <button onClick={handleLogout} style={margin}>logout</button>}
-      </div>
+        {user && <FakeButton onClick={handleLogout} style={margin}>logout</FakeButton>}
+      </Navigation>
+      <Notification text={notification}/>
       <Routes>
         <Route path='/' element={<Blogs blogs={blogs} />} />
         <Route path='create' element={<BlogForm createBlog={HandleBlogCreation} />} />
