@@ -45,3 +45,12 @@ export const Alert = styled.div`
   margin-top: 10px;
   margin-bottom: 10px;
 `
+
+export const Unit = styled.div`
+  background: lightskyblue;
+  margin: 1em 0;
+  padding: 0 1em 1em;
+  border: 2px solid blue;
+  border-style: solid;
+  border-radius: 5px
+`
